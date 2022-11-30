@@ -1,21 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 
-const BookMark = () => {
-  const [status, setStatus] = useState(false);
-
-  const handleMenuClick = () => {
-    setStatus((prevState) => !prevState);
-  };
-
-  const renderArrow = () => {
-    return status ? (
-      <i className="bi bi-airplane-fill"></i>
-    ) : (
-      <i className="bi bi-airplane"></i>
-    );
-  };
-
-  return <span onClick={handleMenuClick}>{renderArrow()}</span>;
+const BookMark = ({ status, ...rest }) => {
+  return (
+    <button {...rest}>
+      <i className={"bi bi-bookmark" + (status ? "-heart-fill" : "")}></i>
+    </button>
+  );
 };
 
+BookMark.propTypes = {
+  status: PropTypes.string.isRequired
+};
 export default BookMark;

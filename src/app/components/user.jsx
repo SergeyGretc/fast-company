@@ -1,32 +1,51 @@
 import React from "react";
-import Quality from "./qualitie";
+import Qualitie from "./qualitie";
 import BookMark from "./bookmark";
-
-const User = ({ onActiveDelete, ...rest }) => {
+import PropTypes from "prop-types";
+const User = ({
+  _id,
+  name,
+  qualities,
+  profession,
+  completedMeetings,
+  rate,
+  onDelete,
+  bookmark,
+  onToggleBookMark
+}) => {
   return (
-    <tr key={rest._id}>
-      <td>{rest.name}</td>
+    <tr>
+      <td>{name}</td>
       <td>
-        {rest.qualities.map((item) => (
-          <Quality {...item} />
+        {qualities.map((qual) => (
+          <Qualitie key={qual._id} {...qual} />
         ))}
       </td>
-      <td>{rest.profession.name}</td>
-      <td>{rest.completedMeetings}</td>
-      <td>{rest.rate} /5</td>
+      <td>{profession.name}</td>
+      <td>{completedMeetings}</td>
+      <td>{rate} /5</td>
       <td>
-        <BookMark />
+        <BookMark status={bookmark} onClick={() => onToggleBookMark(_id)} />
       </td>
       <td>
-        <button
-          onClick={() => onActiveDelete(rest._id)}
-          className="btn btn-danger"
-        >
+        <button onClick={() => onDelete(_id)} className="btn btn-danger">
           delete
         </button>
       </td>
     </tr>
   );
+};
+
+User.propTypes = {
+  _id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  qualities: PropTypes.object.isRequired,
+  profession: PropTypes.object.isRequired,
+  completedMeetings: PropTypes.number.isRequired,
+  rate: PropTypes.number.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  bookmark: PropTypes.string.isRequired,
+  onToggleBookMark: PropTypes.func.isRequired
 };
 
 export default User;
