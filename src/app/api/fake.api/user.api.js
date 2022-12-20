@@ -153,10 +153,3 @@ const fetchAll = () =>
 export default {
   fetchAll
 };
-
-// const fetchAll = () => {
-//   return users;
-// };
-// export default {
-//   fetchAll
-// };
