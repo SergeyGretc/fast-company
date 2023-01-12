@@ -7,23 +7,37 @@ import GroupList from "./groupList";
 import SearchStatus from "./searchStatus";
 import UserTable from "./usersTable";
 import _ from "lodash";
-import SearchField from "./searchField";
+
+import TextField from "./textField";
 
 const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [professions, setProfession] = useState();
-  const [selectedProf, setSelectedProf] = useState();
+  const [selectedProf, setSelectedProf] = useState(null);
   const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
   const [searchText, setSearchText] = useState("");
+  const [enterSearchText, setEnterSearchText] = useState("");
   const pageSize = 8;
 
-  const [users, setUsers] = useState();
+  const [users, setUsers] = useState([]);
+
   useEffect(() => {
     api.users.fetchAll().then((data) => setUsers(data));
+    api.professions.fetchAll().then((data) => setProfession(data));
   }, []);
+
+  useEffect(() => {
+    if (selectedProf) {
+      setSearchText("");
+      setEnterSearchText("");
+      setCurrentPage(1);
+    }
+  }, [selectedProf]);
+
   const handleDelete = (userId) => {
     setUsers(users.filter((user) => user._id !== userId));
   };
+
   const handleToggleBookMark = (id) => {
     const newArray = users.map((user) => {
       if (user._id === id) {
@@ -33,14 +47,6 @@ const Users = () => {
     });
     setUsers(newArray);
   };
-
-  useEffect(() => {
-    api.professions.fetchAll().then((data) => setProfession(data));
-  }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedProf]);
 
   const handleProfessionSelect = (item) => {
     setSelectedProf(item);
@@ -58,29 +64,35 @@ const Users = () => {
     setSearchText(value);
   };
 
-  if (users) {
-    const filteredUsers = selectedProf
-      ? users.filter(
-          (user) =>
-            JSON.stringify(user.profession) === JSON.stringify(selectedProf)
-        )
-      : users;
+  const handleEnterPress = (e) => {
+    if (e.key === "Enter") {
+      setEnterSearchText(searchText);
+      setSelectedProf(null);
+    }
+  };
 
-    const count = filteredUsers.length;
+  const handleClearFilter = () => {
+    setSelectedProf();
+  };
 
-    const sortedUsers = _.orderBy(filteredUsers, [sortBy.path], [sortBy.order]);
-    const clearFilter = () => {
-      setSelectedProf();
-    };
-    const usersCrop = searchText
-      ? paginate(sortedUsers, currentPage, pageSize).filter((obj) => {
-          if (obj.name.toLowerCase().includes(searchText.toLowerCase())) {
-            return true;
-          }
-          return false;
-        })
-      : paginate(sortedUsers, currentPage, pageSize);
+  const filteredUsers = selectedProf
+    ? users.filter(
+        (user) =>
+          JSON.stringify(user.profession) === JSON.stringify(selectedProf)
+      )
+    : users;
 
+  const count = filteredUsers.length;
+
+  const sortedUsers = _.orderBy(filteredUsers, [sortBy.path], [sortBy.order]);
+
+  const usersCrop = enterSearchText
+    ? paginate(sortedUsers, currentPage, pageSize).filter((obj) =>
+        obj.name.toLowerCase().includes(enterSearchText.toLowerCase())
+      )
+    : paginate(sortedUsers, currentPage, pageSize);
+
+  if (users.length) {
     return (
       <>
         <div className="d-flex">
@@ -91,7 +103,10 @@ const Users = () => {
                 items={professions}
                 onItemSelect={handleProfessionSelect}
               />
-              <button className="btn btn-secondary mt-2" onClick={clearFilter}>
+              <button
+                className="btn btn-secondary mt-2"
+                onClick={handleClearFilter}
+              >
                 {" "}
                 Очистить
               </button>
@@ -99,13 +114,15 @@ const Users = () => {
           )}
           <div className="d-flex flex-column">
             <SearchStatus length={count} />
-
-            <SearchField
+            <TextField
               label="Search..."
               name="search"
-              searchText={searchText}
-              onSearch={handleSearchText}
+              type="text"
+              value={searchText}
+              onChange={handleSearchText}
+              onKeyDown={handleEnterPress}
             />
+
             {count > 0 && (
               <UserTable
                 users={usersCrop}
