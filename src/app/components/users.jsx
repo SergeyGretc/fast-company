@@ -7,12 +7,14 @@ import GroupList from "./groupList";
 import SearchStatus from "./searchStatus";
 import UserTable from "./usersTable";
 import _ from "lodash";
+import SearchField from "./searchField";
 
 const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [professions, setProfession] = useState();
   const [selectedProf, setSelectedProf] = useState();
   const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
+  const [searchText, setSearchText] = useState("");
   const pageSize = 8;
 
   const [users, setUsers] = useState();
@@ -51,6 +53,11 @@ const Users = () => {
     setSortBy(item);
   };
 
+  const handleSearchText = (e) => {
+    const { value } = e.target;
+    setSearchText(value);
+  };
+
   if (users) {
     const filteredUsers = selectedProf
       ? users.filter(
@@ -60,11 +67,19 @@ const Users = () => {
       : users;
 
     const count = filteredUsers.length;
+
     const sortedUsers = _.orderBy(filteredUsers, [sortBy.path], [sortBy.order]);
-    const usersCrop = paginate(sortedUsers, currentPage, pageSize);
     const clearFilter = () => {
       setSelectedProf();
     };
+    const usersCrop = searchText
+      ? paginate(sortedUsers, currentPage, pageSize).filter((obj) => {
+          if (obj.name.toLowerCase().includes(searchText.toLowerCase())) {
+            return true;
+          }
+          return false;
+        })
+      : paginate(sortedUsers, currentPage, pageSize);
 
     return (
       <>
@@ -84,6 +99,13 @@ const Users = () => {
           )}
           <div className="d-flex flex-column">
             <SearchStatus length={count} />
+
+            <SearchField
+              label="Search..."
+              name="search"
+              searchText={searchText}
+              onSearch={handleSearchText}
+            />
             {count > 0 && (
               <UserTable
                 users={usersCrop}
