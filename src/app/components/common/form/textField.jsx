@@ -11,6 +11,9 @@ const TextField = ({
   onKeyDown
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const handleChange = ({ target }) => {
+    onChange({ name: target.name, value: target.value });
+  };
   const getInputClasses = () => {
     return "form-control" + (error ? " is-invalid" : "");
   };
@@ -26,7 +29,7 @@ const TextField = ({
           id={name}
           value={value}
           name={name}
-          onChange={onChange}
+          onChange={handleChange}
           className={getInputClasses()}
           onKeyDown={onKeyDown}
         />
